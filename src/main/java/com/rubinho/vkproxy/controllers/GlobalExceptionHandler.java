@@ -24,9 +24,4 @@ public class GlobalExceptionHandler {
                 .body(ErrorDto.builder().message(ex.getMessage()).build());
     }
 
-    @ExceptionHandler(MaxUploadSizeExceededException.class)
-    public ResponseEntity<ErrorDto> handleMaxSizeException(MaxUploadSizeExceededException exc) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(ErrorDto.builder().message("File too large!").build());
-    }
 }

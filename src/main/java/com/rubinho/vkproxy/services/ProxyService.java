@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-
 import java.util.Collections;
 import java.util.Map;
 
@@ -14,13 +13,11 @@ public class ProxyService {
     private final RestTemplate restTemplate;
     private final String URL = "https://jsonplaceholder.typicode.com/";
 
-
     public ResponseEntity<String> proxyingGetRequest(String request) {
         return ResponseEntity.ok(restTemplate.getForObject(URL + request, String.class));
     }
 
     public ResponseEntity<String> proxyingPostRequest(String request, Map<String, Object> lookupRequestObject) {
-
         HttpHeaders headers = getHeaders();
 
         HttpEntity<Map<String, Object>> entity = new HttpEntity<>(lookupRequestObject, headers);
