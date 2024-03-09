@@ -33,7 +33,7 @@ public class LoggingFilter implements Filter {
         String method = request.getMethod();
         String remoteUser = request.getRemoteUser();
 
-        auditService.fileAudit(auditService.getMessage(remoteUser, true, uri, method));
+        auditService.doAudit(remoteUser, true, uri, method);
 
         filterChain.doFilter(request, response);
 
