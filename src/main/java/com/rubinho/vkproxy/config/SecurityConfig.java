@@ -1,9 +1,11 @@
 package com.rubinho.vkproxy.config;
 
+
 import com.rubinho.vkproxy.jwt.JwtAccessDeniedHandler;
 import com.rubinho.vkproxy.jwt.JwtAuthFilter;
 import com.rubinho.vkproxy.jwt.JwtAuthenticationEntryPoint;
 import com.rubinho.vkproxy.jwt.UserAuthProvider;
+import com.rubinho.vkproxy.services.AuditService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
@@ -20,9 +22,11 @@ import org.springframework.web.servlet.HandlerExceptionResolver;
 
 @Configuration
 @EnableWebSecurity
+
 public class SecurityConfig {
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
     private final UserAuthProvider userAuthProvider;
+    private final AuditService auditService;
 
     @Qualifier("handlerExceptionResolver")
     private final HandlerExceptionResolver resolver;
@@ -30,19 +34,22 @@ public class SecurityConfig {
     @Autowired
     public SecurityConfig(JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint,
                           UserAuthProvider userAuthProvider,
-                          @Qualifier("handlerExceptionResolver") HandlerExceptionResolver resolver) {
+                          @Qualifier("handlerExceptionResolver") HandlerExceptionResolver resolver,
+                          AuditService auditService) {
         this.jwtAuthenticationEntryPoint = jwtAuthenticationEntryPoint;
         this.userAuthProvider = userAuthProvider;
         this.resolver = resolver;
+        this.auditService = auditService;
     }
 
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        return http
+        http
                 .csrf(AbstractHttpConfigurer::disable)
                 .addFilterBefore(new JwtAuthFilter(userAuthProvider, resolver), UsernamePasswordAuthenticationFilter.class)
                 .exceptionHandling((exception) -> exception.authenticationEntryPoint(jwtAuthenticationEntryPoint))
+                .exceptionHandling(exception -> exception.accessDeniedHandler(accessDeniedHandler()))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests((requests) -> requests
                         .requestMatchers(HttpMethod.GET, "/api/posts/**").hasAnyRole("ADMIN", "POSTS", "POSTS_VIEWER", "POSTS_EDITOR")
@@ -63,13 +70,14 @@ public class SecurityConfig {
 
 
                         .anyRequest().permitAll()
-                )
-                .build();
+                );
+
+        return http.build();
 
     }
 
-//    @Bean
-//    public AccessDeniedHandler accessDeniedHandler() {
-//        return new JwtAccessDeniedHandler();
-//    }
+    @Bean
+    public AccessDeniedHandler accessDeniedHandler() {
+        return new JwtAccessDeniedHandler(auditService);
+    }
 }

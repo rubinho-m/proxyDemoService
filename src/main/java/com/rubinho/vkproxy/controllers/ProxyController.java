@@ -1,5 +1,6 @@
 package com.rubinho.vkproxy.controllers;
 
+import com.rubinho.vkproxy.services.AuditService;
 import com.rubinho.vkproxy.services.ProxyService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
