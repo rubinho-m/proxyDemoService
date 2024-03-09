@@ -1,5 +1,6 @@
 package com.rubinho.vkproxy.config;
 
+import com.rubinho.vkproxy.jwt.JwtAccessDeniedHandler;
 import com.rubinho.vkproxy.jwt.JwtAuthFilter;
 import com.rubinho.vkproxy.jwt.JwtAuthenticationEntryPoint;
 import com.rubinho.vkproxy.jwt.UserAuthProvider;
@@ -13,6 +14,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 
@@ -43,26 +45,31 @@ public class SecurityConfig {
                 .exceptionHandling((exception) -> exception.authenticationEntryPoint(jwtAuthenticationEntryPoint))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests((requests) -> requests
-                        .requestMatchers(HttpMethod.GET, "/api/posts/**").hasAnyRole("POSTS_VIEWER", "POSTS_EDITOR")
-                        .requestMatchers(HttpMethod.POST, "/api/posts/**").hasRole("POSTS_EDITOR")
-                        .requestMatchers(HttpMethod.PUT, "/api/posts/**").hasRole("POSTS_EDITOR")
+                        .requestMatchers(HttpMethod.GET, "/api/posts/**").hasAnyRole("ADMIN", "POSTS", "POSTS_VIEWER", "POSTS_EDITOR")
+                        .requestMatchers(HttpMethod.POST, "/api/posts/**").hasAnyRole("ADMIN", "POSTS", "POSTS_EDITOR")
+                        .requestMatchers(HttpMethod.PUT, "/api/posts/**").hasAnyRole("ADMIN", "POSTS", "POSTS_EDITOR")
+                        .requestMatchers(HttpMethod.DELETE, "/api/posts/**").hasAnyRole("ADMIN", "POSTS")
 
-                        .requestMatchers(HttpMethod.GET, "/api/users/**").hasAnyRole("USERS_VIEWER", "USERS_EDITOR")
-                        .requestMatchers(HttpMethod.POST, "/api/users/**").hasRole("USERS_EDITOR")
-                        .requestMatchers(HttpMethod.PUT, "/api/users/**").hasRole("USERS_EDITOR")
+                        .requestMatchers(HttpMethod.GET, "/api/users/**").hasAnyRole("ADMIN", "USERS", "USERS_VIEWER", "USERS_EDITOR")
+                        .requestMatchers(HttpMethod.POST, "/api/users/**").hasAnyRole("ADMIN", "USERS", "USERS_EDITOR")
+                        .requestMatchers(HttpMethod.PUT, "/api/users/**").hasAnyRole("ADMIN", "USERS", "USERS_EDITOR")
+                        .requestMatchers(HttpMethod.DELETE, "/api/users/**").hasAnyRole("ADMIN", "USERS")
 
 
-                        .requestMatchers(HttpMethod.GET, "/api/albums/**").hasAnyRole("ALBUMS_VIEWER", "ALBUMS_EDITOR")
-                        .requestMatchers(HttpMethod.POST, "/api/albums/**").hasRole("ALBUMS_EDITOR")
-                        .requestMatchers(HttpMethod.PUT, "/api/albums/**").hasRole("ALBUMS_EDITOR")
+                        .requestMatchers(HttpMethod.GET, "/api/albums/**").hasAnyRole("ADMIN", "ALBUMS", "ALBUMS_VIEWER", "ALBUMS_EDITOR")
+                        .requestMatchers(HttpMethod.POST, "/api/albums/**").hasAnyRole("ADMIN", "ALBUMS", "ALBUMS_EDITOR")
+                        .requestMatchers(HttpMethod.PUT, "/api/albums/**").hasAnyRole("ADMIN", "ALBUMS", "ALBUMS_EDITOR")
+                        .requestMatchers(HttpMethod.DELETE, "/api/albums/**").hasAnyRole("ADMIN", "ALBUMS")
 
-                        .requestMatchers("/api/posts/**").hasAnyRole("ADMIN", "POSTS")
-                        .requestMatchers("/api/users/**").hasAnyRole("ADMIN", "USERS")
-                        .requestMatchers("/api/albums/**").hasAnyRole("ADMIN", "ALBUMS")
 
                         .anyRequest().permitAll()
                 )
                 .build();
 
     }
+
+//    @Bean
+//    public AccessDeniedHandler accessDeniedHandler() {
+//        return new JwtAccessDeniedHandler();
+//    }
 }
