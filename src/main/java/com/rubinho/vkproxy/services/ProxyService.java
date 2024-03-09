@@ -1,9 +1,13 @@
 package com.rubinho.vkproxy.services;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+
 import java.util.Collections;
 import java.util.Map;
 
@@ -13,10 +17,13 @@ public class ProxyService {
     private final RestTemplate restTemplate;
     private final String URL = "https://jsonplaceholder.typicode.com/";
 
+
+    @Cacheable("request")
     public ResponseEntity<String> proxyingGetRequest(String request) {
         return ResponseEntity.ok(restTemplate.getForObject(URL + request, String.class));
     }
 
+    @Cacheable("request")
     public ResponseEntity<String> proxyingPostRequest(String request, Map<String, Object> lookupRequestObject) {
         HttpHeaders headers = getHeaders();
 
@@ -25,6 +32,7 @@ public class ProxyService {
         return restTemplate.postForEntity(URL + request, entity, String.class);
     }
 
+    @CachePut("request")
     public ResponseEntity<String> proxyingPutRequest(String request,
                                                      Map<String, Object> lookupRequestObject,
                                                      Long id) {
@@ -35,6 +43,7 @@ public class ProxyService {
         return restTemplate.exchange(URL + request, HttpMethod.PUT, entity, String.class, id);
     }
 
+    @CacheEvict("request")
     public void proxyingDeleteRequest(String request,
                                       Long id) {
         restTemplate.delete(URL + request, id);
