@@ -43,6 +43,23 @@ public class SecurityConfig {
                 .exceptionHandling((exception) -> exception.authenticationEntryPoint(jwtAuthenticationEntryPoint))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests((requests) -> requests
+                        .requestMatchers(HttpMethod.GET, "/api/posts/**").hasAnyRole("POSTS_VIEWER", "POSTS_EDITOR")
+                        .requestMatchers(HttpMethod.POST, "/api/posts/**").hasRole("POSTS_EDITOR")
+                        .requestMatchers(HttpMethod.PUT, "/api/posts/**").hasRole("POSTS_EDITOR")
+
+                        .requestMatchers(HttpMethod.GET, "/api/users/**").hasAnyRole("USERS_VIEWER", "USERS_EDITOR")
+                        .requestMatchers(HttpMethod.POST, "/api/users/**").hasRole("USERS_EDITOR")
+                        .requestMatchers(HttpMethod.PUT, "/api/users/**").hasRole("USERS_EDITOR")
+
+
+                        .requestMatchers(HttpMethod.GET, "/api/albums/**").hasAnyRole("ALBUMS_VIEWER", "ALBUMS_EDITOR")
+                        .requestMatchers(HttpMethod.POST, "/api/albums/**").hasRole("ALBUMS_EDITOR")
+                        .requestMatchers(HttpMethod.PUT, "/api/albums/**").hasRole("ALBUMS_EDITOR")
+
+                        .requestMatchers("/api/posts/**").hasAnyRole("ADMIN", "POSTS")
+                        .requestMatchers("/api/users/**").hasAnyRole("ADMIN", "USERS")
+                        .requestMatchers("/api/albums/**").hasAnyRole("ADMIN", "ALBUMS")
+
                         .anyRequest().permitAll()
                 )
                 .build();
