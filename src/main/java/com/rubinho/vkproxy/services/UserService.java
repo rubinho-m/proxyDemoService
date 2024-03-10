@@ -5,8 +5,10 @@ import com.rubinho.vkproxy.dto.SignUpDto;
 import com.rubinho.vkproxy.dto.UserDto;
 import com.rubinho.vkproxy.exceptions.AppException;
 import com.rubinho.vkproxy.mappers.UserMapper;
+import com.rubinho.vkproxy.model.Activations;
 import com.rubinho.vkproxy.model.Role;
 import com.rubinho.vkproxy.model.User;
+import com.rubinho.vkproxy.repositories.ActivationsRepository;
 import com.rubinho.vkproxy.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -19,15 +21,16 @@ import org.springframework.stereotype.Service;
 import java.nio.CharBuffer;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 
 @RequiredArgsConstructor
 @Service
 public class UserService {
     private final UserRepository userRepository;
+    private final ActivationsRepository activationsRepository;
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
-
 
 
     public UserDto login(CredentialsDto credentialsDto) {
@@ -68,6 +71,38 @@ public class UserService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new AppException("Unknown user", HttpStatus.NOT_FOUND));
         return userMapper.toUserDto(user);
+    }
+
+    public UserDto activateUser(User user, String code) {
+        Activations activations = activationsRepository.findByUser(user)
+                .orElseThrow(() -> new AppException("Unknown user", HttpStatus.NOT_FOUND));
+
+        if (!activations.getCode().equals(code)){
+            throw new AppException("Invalid code", HttpStatus.UNAUTHORIZED);
+        }
+
+        changeRoleForUser(user.getId(), Role.ROLE_VERIFIED_USER);
+        user.setRole(Role.ROLE_VERIFIED_USER);
+
+        return userMapper.toUserDto(user);
+    }
+
+    private String getCode() {
+        return UUID.randomUUID().toString();
+    }
+
+    public String setCodeForUser(User user) {
+        String code = getCode();
+
+        Activations activations = Activations
+                .builder()
+                .user(user)
+                .code(code)
+                .build();
+
+        activationsRepository.save(activations);
+
+        return code;
     }
 
     private static List<GrantedAuthority> getAuthorities(List<Role> roles) {
