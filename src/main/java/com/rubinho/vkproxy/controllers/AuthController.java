@@ -25,12 +25,42 @@ public class AuthController {
     private final UserMapper userMapper;
 
     @PostMapping("/activate")
-    private ResponseEntity<UserDto> activate(@RequestHeader("Authorization") String authorizationHeader,
-                                       String code) {
+    public ResponseEntity<UserDto> activate(@RequestHeader("Authorization") String authorizationHeader,
+                                            String code) {
         String email = userAuthProvider.getUsernameFromJwt(authorizationHeader.split(" ")[1]);
         UserDto userDto = userService.findByEmail(email);
 
         userDto = userService.activateUser(userMapper.dtoToUser(userDto), code);
+
+        auditService.doAudit(userMapper.dtoToUser(userDto), true, "/activate", "POST");
+
+        return new ResponseEntity<>(userDto, HttpStatus.ACCEPTED);
+    }
+
+    @GetMapping("/password/permission")
+    public ResponseEntity<String> passwordPermission(@RequestHeader("Authorization") String authorizationHeader) {
+        String email = userAuthProvider.getUsernameFromJwt(authorizationHeader.split(" ")[1]);
+        UserDto userDto = userService.findByEmail(email);
+
+        String code = userService.setRestorePasswordCodeForUser(userMapper.dtoToUser(userDto));
+
+        mailService.sendRestorePassword(email, code);
+
+        auditService.doAudit(userMapper.dtoToUser(userDto), true, "/password/permission", "GET");
+
+        return new ResponseEntity<>(code, HttpStatus.CREATED);
+    }
+
+    @PostMapping("/password/restore")
+    public ResponseEntity<UserDto> passwordRestore(@RequestHeader("Authorization") String authorizationHeader,
+                                                   String code,
+                                                   String password) {
+        String email = userAuthProvider.getUsernameFromJwt(authorizationHeader.split(" ")[1]);
+        UserDto userDto = userService.findByEmail(email);
+
+        userDto = userService.restorePassword(userMapper.dtoToUser(userDto), code, password);
+
+        auditService.doAudit(userMapper.dtoToUser(userDto), true, "/password/restore", "POST");
 
         return new ResponseEntity<>(userDto, HttpStatus.ACCEPTED);
     }
@@ -42,7 +72,7 @@ public class AuthController {
 
         auditService.doAudit(userMapper.dtoToUser(user), true, "/register", "POST");
 
-        String code = userService.setCodeForUser(userMapper.dtoToUser(user));
+        String code = userService.setActivationCodeForUser(userMapper.dtoToUser(user));
 
         mailService.sendActivation(user.getEmail(), code);
 

@@ -17,12 +17,16 @@ public class MailService {
     private final JavaMailSender mailSender;
 
 
-
     @Async
-    public void sendActivation(String toEmail , String text) {
+    public void sendActivation(String toEmail, String text) {
         sendEmail(toEmail, "Код для активации", text);
     }
 
+
+    @Async
+    public void sendRestorePassword(String toEmail, String text) {
+        sendEmail(toEmail, "Код для сброса пароля", text);
+    }
 
     public void sendEmail(String toEmail, String subject, String text) {
         System.out.println(fromEmail + " " + toEmail);

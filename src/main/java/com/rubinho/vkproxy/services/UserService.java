@@ -6,9 +6,11 @@ import com.rubinho.vkproxy.dto.UserDto;
 import com.rubinho.vkproxy.exceptions.AppException;
 import com.rubinho.vkproxy.mappers.UserMapper;
 import com.rubinho.vkproxy.model.Activations;
+import com.rubinho.vkproxy.model.Restores;
 import com.rubinho.vkproxy.model.Role;
 import com.rubinho.vkproxy.model.User;
 import com.rubinho.vkproxy.repositories.ActivationsRepository;
+import com.rubinho.vkproxy.repositories.RestoresRepository;
 import com.rubinho.vkproxy.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -29,6 +31,7 @@ import java.util.UUID;
 public class UserService {
     private final UserRepository userRepository;
     private final ActivationsRepository activationsRepository;
+    private final RestoresRepository restoresRepository;
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
 
@@ -73,11 +76,27 @@ public class UserService {
         return userMapper.toUserDto(user);
     }
 
+
+    public UserDto restorePassword(User user, String code, String password) {
+        Restores restores = restoresRepository.findByUser(user)
+                .orElseThrow(() -> new AppException("Unknown user", HttpStatus.NOT_FOUND));
+
+        if (!restores.getCode().equals(code)) {
+            throw new AppException("Invalid code", HttpStatus.UNAUTHORIZED);
+        }
+
+        String hashPassword = passwordEncoder.encode(CharBuffer.wrap(password));
+        userRepository.changePassword(user.getId(), hashPassword);
+        user.setPassword(hashPassword);
+
+        return userMapper.toUserDto(user);
+    }
+
     public UserDto activateUser(User user, String code) {
         Activations activations = activationsRepository.findByUser(user)
                 .orElseThrow(() -> new AppException("Unknown user", HttpStatus.NOT_FOUND));
 
-        if (!activations.getCode().equals(code)){
+        if (!activations.getCode().equals(code)) {
             throw new AppException("Invalid code", HttpStatus.UNAUTHORIZED);
         }
 
@@ -91,7 +110,7 @@ public class UserService {
         return UUID.randomUUID().toString();
     }
 
-    public String setCodeForUser(User user) {
+    public String setActivationCodeForUser(User user) {
         String code = getCode();
 
         Activations activations = Activations
@@ -101,6 +120,20 @@ public class UserService {
                 .build();
 
         activationsRepository.save(activations);
+
+        return code;
+    }
+
+    public String setRestorePasswordCodeForUser(User user) {
+        String code = getCode();
+
+        Restores restores = Restores
+                .builder()
+                .user(user)
+                .code(code)
+                .build();
+
+        restoresRepository.save(restores);
 
         return code;
     }
