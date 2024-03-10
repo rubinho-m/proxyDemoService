@@ -41,6 +41,10 @@ public class UserAuthProvider {
                 .sign(Algorithm.HMAC256(secretKey));
     }
 
+    public String getUsernameFromJwt(String token){
+        return JWT.decode(token).getIssuer();
+    }
+
     public Authentication validateToken(String token){
         JWTVerifier verifier = JWT.require(Algorithm.HMAC256(secretKey))
                 .build();

@@ -42,15 +42,6 @@ public class AuditService {
         ledgerRepository.save(ledger);
     }
 
-    public User getUserfromRemoteUser(String remoteUser) {
-        if (remoteUser == null) return null;
-
-        return User
-                .builder()
-                .email(getEmailFromRemoteUser(remoteUser))
-                .role(Role.valueOf(getRoleFromRemoteUser(remoteUser)))
-                .build();
-    }
 
     private String getMessage(String username, String role, boolean hasAccess, String uri, String method) {
         StringJoiner logMessage = new StringJoiner("---");
@@ -65,16 +56,5 @@ public class AuditService {
         return logMessage.toString();
     }
 
-    private String getEmailFromRemoteUser(String remoteUser) {
-        remoteUser = remoteUser.replace("UserDto", "").replace("(", "").replace(")", "");
-        String[] parts = remoteUser.split(",");
-        return parts[1].replace("email=", "").strip();
-    }
-
-    private String getRoleFromRemoteUser(String remoteUser) {
-        remoteUser = remoteUser.replace("UserDto", "").replace("(", "").replace(")", "");
-        String[] parts = remoteUser.split(",");
-        return parts[3].replace("role=", "").strip();
-    }
 
 }

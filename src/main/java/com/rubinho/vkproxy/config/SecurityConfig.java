@@ -5,7 +5,9 @@ import com.rubinho.vkproxy.jwt.JwtAccessDeniedHandler;
 import com.rubinho.vkproxy.jwt.JwtAuthFilter;
 import com.rubinho.vkproxy.jwt.JwtAuthenticationEntryPoint;
 import com.rubinho.vkproxy.jwt.UserAuthProvider;
+import com.rubinho.vkproxy.mappers.UserMapper;
 import com.rubinho.vkproxy.services.AuditService;
+import com.rubinho.vkproxy.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
@@ -27,6 +29,8 @@ public class SecurityConfig {
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
     private final UserAuthProvider userAuthProvider;
     private final AuditService auditService;
+    private final UserService userService;
+    private final UserMapper userMapper;
 
     @Qualifier("handlerExceptionResolver")
     private final HandlerExceptionResolver resolver;
@@ -35,11 +39,15 @@ public class SecurityConfig {
     public SecurityConfig(JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint,
                           UserAuthProvider userAuthProvider,
                           @Qualifier("handlerExceptionResolver") HandlerExceptionResolver resolver,
-                          AuditService auditService) {
+                          AuditService auditService,
+                          UserService userService,
+                          UserMapper userMapper) {
         this.jwtAuthenticationEntryPoint = jwtAuthenticationEntryPoint;
         this.userAuthProvider = userAuthProvider;
         this.resolver = resolver;
         this.auditService = auditService;
+        this.userService = userService;
+        this.userMapper = userMapper;
     }
 
 
@@ -80,6 +88,6 @@ public class SecurityConfig {
 
     @Bean
     public AccessDeniedHandler accessDeniedHandler() {
-        return new JwtAccessDeniedHandler(auditService);
+        return new JwtAccessDeniedHandler(auditService, userService, userAuthProvider, userMapper);
     }
 }
