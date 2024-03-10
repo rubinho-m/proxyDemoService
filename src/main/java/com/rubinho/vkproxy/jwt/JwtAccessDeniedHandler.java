@@ -30,7 +30,7 @@ public class JwtAccessDeniedHandler implements AccessDeniedHandler {
         String method = request.getMethod();
         String remoteUser = request.getRemoteUser();
 
-        auditService.doAudit(remoteUser, false, uri, method);
+        auditService.doAudit(auditService.getUserfromRemoteUser(remoteUser), false, uri, method);
 
         OBJECT_MAPPER.writeValue(response.getOutputStream(), new ErrorDto("Forbidden"));
     }

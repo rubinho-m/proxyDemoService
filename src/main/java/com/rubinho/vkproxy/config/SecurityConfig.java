@@ -68,6 +68,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PUT, "/api/albums/**").hasAnyRole("ADMIN", "ALBUMS", "ALBUMS_EDITOR")
                         .requestMatchers(HttpMethod.DELETE, "/api/albums/**").hasAnyRole("ADMIN", "ALBUMS")
 
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
+
 
                         .anyRequest().permitAll()
                 );

@@ -15,7 +15,6 @@ import java.io.IOException;
 @Component
 public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
-
     @Override
     public void commence(HttpServletRequest request,
                          HttpServletResponse response,

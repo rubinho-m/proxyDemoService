@@ -29,6 +29,7 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
 
 
+
     public UserDto login(CredentialsDto credentialsDto) {
         User user = userRepository.findByEmail(credentialsDto.getEmail())
                 .orElseThrow(() -> new AppException("Unknown user", HttpStatus.NOT_FOUND));
@@ -42,7 +43,7 @@ public class UserService {
     }
 
     public UserDto register(SignUpDto userDto) {
-        if (userRepository.existsByEmail(userDto.getEmail())){
+        if (userRepository.existsByEmail(userDto.getEmail())) {
             throw new AppException("User with such email already exists", HttpStatus.BAD_REQUEST);
         }
 
@@ -53,6 +54,13 @@ public class UserService {
         userRepository.save(user);
 
         return userMapper.toUserDto(user);
+
+    }
+
+    public UserDto changeRoleForUser(Long id, Role role) {
+        userRepository.changeRole(id, role);
+        return userMapper.toUserDto(userRepository.findById(id)
+                .orElseThrow(() -> new AppException("Unknown user", HttpStatus.NOT_FOUND)));
 
     }
 
@@ -69,7 +77,6 @@ public class UserService {
         }
         return authorities;
     }
-
 
 
     public UserDetails getUserDetails(String email) {
