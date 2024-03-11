@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
@@ -32,4 +34,7 @@ public class Ledger {
 
     @Column(nullable = false)
     private String method;
+
+    @Column(nullable = false)
+    private LocalDateTime logTime;
 }

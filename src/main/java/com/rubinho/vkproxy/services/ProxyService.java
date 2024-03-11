@@ -23,7 +23,7 @@ public class ProxyService {
         return ResponseEntity.ok(restTemplate.getForObject(URL + request, String.class));
     }
 
-    @Cacheable("request")
+    @CachePut("request")
     public ResponseEntity<String> proxyingPostRequest(String request, Map<String, Object> lookupRequestObject) {
         HttpHeaders headers = getHeaders();
 

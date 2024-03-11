@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.StringJoiner;
 
 
@@ -17,29 +18,31 @@ import java.util.StringJoiner;
 public class AuditService {
     private final LedgerRepository ledgerRepository;
 
-    public void doAudit(User user, boolean hasAccess, String uri, String method) {
-        if (user == null) return;
+    public Ledger doAudit(User user, boolean hasAccess, String uri, String method) {
+        if (user == null) return null;
 
         String message = getMessage(user.getEmail(), user.getRole().name(), hasAccess, uri, method);
 
         fileAudit(message);
-        databaseAudit(user.getEmail(), user.getRole(), hasAccess, uri, method);
+
+        return databaseAudit(user.getEmail(), user.getRole(), hasAccess, uri, method);
     }
 
     private void fileAudit(String message) {
         log.warn(message);
     }
 
-    private void databaseAudit(String username, Role role, boolean hasAccess, String uri, String method) {
+    private Ledger databaseAudit(String username, Role role, boolean hasAccess, String uri, String method) {
         Ledger ledger = Ledger.builder()
                 .username(username)
                 .method(method)
+                .logTime(LocalDateTime.now())
                 .hasAccess(hasAccess)
                 .uri(uri)
                 .role(role)
                 .build();
 
-        ledgerRepository.save(ledger);
+        return ledgerRepository.save(ledger);
     }
 
 
