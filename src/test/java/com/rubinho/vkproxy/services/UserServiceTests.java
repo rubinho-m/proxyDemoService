@@ -105,7 +105,7 @@ class UserServiceTests {
         Mockito.when(userRepository.save(user)).thenReturn(user);
         Mockito.when(userMapper.toUserDto(user)).thenReturn(userDto);
 
-        UserDto savedUser = userService.register(signUpDto);
+        UserDto savedUser = userService.register(signUpDto, Role.ROLE_UNVERIFIED_USER);
 
         Assertions.assertThat(savedUser).isNotNull();
 
@@ -118,7 +118,7 @@ class UserServiceTests {
         Mockito.when(userRepository.existsByEmail(signUpDto.getEmail())).thenReturn(true);
 
         Assertions.assertThatExceptionOfType(AppException.class)
-                .isThrownBy(() -> userService.register(signUpDto));
+                .isThrownBy(() -> userService.register(signUpDto, Role.ROLE_UNVERIFIED_USER));
 
 
     }

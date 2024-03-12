@@ -13,6 +13,7 @@ import com.rubinho.vkproxy.repositories.ActivationsRepository;
 import com.rubinho.vkproxy.repositories.RestoresRepository;
 import com.rubinho.vkproxy.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -35,6 +36,9 @@ public class UserService {
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
 
+    @Value("${SECURED_WORD}")
+    private String SECURED_WORD;
+
 
     public UserDto login(CredentialsDto credentialsDto) {
         User user = userRepository.findByEmail(credentialsDto.getEmail())
@@ -48,19 +52,25 @@ public class UserService {
 
     }
 
-    public UserDto register(SignUpDto userDto) {
+    public UserDto register(SignUpDto userDto, Role role) {
         if (userRepository.existsByEmail(userDto.getEmail())) {
             throw new AppException("User with such email already exists", HttpStatus.BAD_REQUEST);
         }
 
         User user = userMapper.signUpToUser(userDto);
         user.setPassword(passwordEncoder.encode(CharBuffer.wrap(userDto.getPassword())));
-        user.setRole(Role.ROLE_UNVERIFIED_USER);
+        user.setRole(role);
 
         userRepository.save(user);
 
         return userMapper.toUserDto(user);
 
+    }
+
+    public void checkAdminPermissionsForRegistration(String securedWord) {
+        if (!securedWord.equals(SECURED_WORD)) {
+            throw new AppException("Not valid secured word", HttpStatus.FORBIDDEN);
+        }
     }
 
     public UserDto changeRoleForUser(Long id, Role role) {
