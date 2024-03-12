@@ -62,7 +62,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests((requests) -> requests
                         .requestMatchers("/api/activate").authenticated()
                         .requestMatchers("/api/password/**").authenticated()
-
+                        .requestMatchers("/ws").hasRole("ADMIN")
 
                         .requestMatchers(HttpMethod.GET, "/api/posts/**").hasAnyRole("ADMIN", "POSTS", "POSTS_VIEWER", "POSTS_EDITOR")
                         .requestMatchers(HttpMethod.POST, "/api/posts/**").hasAnyRole("ADMIN", "POSTS", "POSTS_EDITOR")
