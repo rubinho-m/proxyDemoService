@@ -31,6 +31,13 @@ public class MessageHandler implements WebSocketHandler {
 
     @Override
     public void handleMessage(WebSocketSession session, WebSocketMessage<?> message) throws Exception {
+        String authorizationHeader = session.getHandshakeHeaders().getFirst("Authorization");
+
+        if (authorizationHeader != null) {
+            User user = webSocketService.getUserFromHeader(authorizationHeader);
+            auditService.doAudit(user, true, "/ws", "MESSAGE");
+        }
+
         Sessions.serverSession.sendMessage(message);
     }
 
