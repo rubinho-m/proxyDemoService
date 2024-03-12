@@ -1,0 +1,25 @@
+version: "3"
+services:
+  postgres:
+    container_name: postgres
+    image: postgres:16.0
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    volumes:
+      - ./postgres-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  backend:
+    container_name: backend
+    image: backend
+    env_file:
+      - docker-backend.env
+    build:
+      context: .
+    depends_on:
+      - postgres
+    ports:
+      - "8080:8080"
