@@ -54,6 +54,8 @@ public class MessageHandler implements WebSocketHandler {
             User user = webSocketService.getUserFromHeader(authorizationHeader);
             auditService.doAudit(user, true, "/ws", "DISCONNECT");
         }
+
+        Sessions.serverSession.close();
     }
 
     @Override
